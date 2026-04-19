@@ -1,0 +1,58 @@
+/*@!Encoding:936*/
+includes
+{
+  #include "CANTP.cin"
+  #include "diagDataProcessing.cin"
+}
+
+variables
+{
+  int gSeedSize = 4;
+  const int cMaxDTCNum = 1023;
+  enum bool { False = 0, True = 1 };
+  struct DTCInfo { dword DTC; byte DTCStatus; };
+  const int gAddreMode=0;
+}
+
+// 初始化诊断连接
+long CreateDiagConnect(char ECUName[], dword addrMode, dword requestID, dword responseID, long paddingValue, dword STmin, word P2Client, word P2ExClient)
+{
+  return CANTPInit(ECUName, addrMode, requestID, responseID, paddingValue, STmin, P2Client, P2ExClient);
+}
+
+// 诊断会话控制 (10服务)
+int DiagnosticSessionControl(long CANTPHandle, byte sessionType)
+{
+  byte request[2]={0x10, 0x01};
+  request[1] = sessionType;
+  CanTpSendDataComplete(CANTPHandle, request, elcount(request));
+  return WaitServerResponse(request);
+}
+
+// ECU 复位 (11服务)
+int ResetECU(long CANTPHandle, byte resetType)
+{
+  byte request[2] = {0x11, 0x01};
+  request[1] = resetType;
+  CanTpSendDataComplete(CANTPHandle, request, elcount(request));
+  return WaitServerResponse(request);
+}
+
+// 安全访问 (27服务: Seed-Key)
+int SecurityAccess(long CANTPHandle, byte securityLevel)
+{
+  byte seedValue[4]={0xAA,0xAA,0xAA,0xAA};
+  if(RequestSeed(CANTPHandle, securityLevel, seedValue) < 0) return -1;
+  if(SendKey(CANTPHandle, securityLevel, seedValue) < 0) return -2;
+  return 0;
+}
+
+// 读取故障码 (19服务)
+int ReadFaultMemory(long CANTPHandle, byte subFunc, byte DTCstatusMask)
+{
+  byte request[3]={0x19, 0x01, 0xFF};
+  request[1] = subFunc;
+  request[2] = DTCstatusMask;
+  CanTpSendDataComplete(CANTPHandle, request, elcount(request));
+  return WaitServerResponse(request);
+}

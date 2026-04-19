@@ -1,0 +1,49 @@
+/*@!Encoding:936*/
+variables
+{
+  char gECUName[256];
+  const char cCANTPReceivedData[] = "CANTPReceivedData";
+  const char cCANTPSendComplete[] = "CANTPSendComplete";
+  
+  byte gCANTPRxBuffer[4095];
+  long gCANTPRxDataLength;
+  byte gExpectedResponse;
+  word gCANTPP2ExClient;
+}
+
+// ISO-TP 传输层初始化
+long CANTPInit(char ECUName[], dword addrMode, dword reqID, dword resID, long padding, dword stMin, word p2, word p2Ex)
+{
+  strncpy(gECUName, ECUName, elcount(gECUName));
+  gCANTPP2ExClient = p2Ex;
+  return CanTpCreateConnection(0); // 简化示例
+}
+
+// 阻塞式等待服务器响应 (带有 Pending 0x78 处理)
+int WaitServerResponse(byte request[])
+{
+  gExpectedResponse = request[0] + 0x40; // 正响应 ID
+  return WaitPendingResponse(request);
+}
+
+// 处理 0x78 Pending 响应的递归等待
+int WaitPendingResponse(byte request[])
+{
+  long status;
+  status = testWaitForTextEvent(cCANTPReceivedData, gCANTPP2ExClient);
+  if(status <= 0) return -1; // 超时或错误
+  
+  if(gCANTPRxBuffer[0] == 0x7F && gCANTPRxBuffer[2] == 0x78)
+  {
+     return WaitPendingResponse(request); // 继续等待
+  }
+  return 0; // 收到正响应
+}
+
+// CANTP 接收中断回调
+void CanTp_ReceptionInd(long connHandle, byte data[])
+{
+  gCANTPRxDataLength = elCount(data);
+  // 拷贝到全局缓存并触发事件
+  TestSupplyTextEvent(cCANTPReceivedData);
+}
