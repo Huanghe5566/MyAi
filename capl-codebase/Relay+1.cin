@@ -1,0 +1,25 @@
+/*@!Encoding:936*/
+variables
+{
+  // 8路继电器控制指令定义 (十六进制)
+  byte buffer1ON[3]={0x00,0xF1,0xff};
+  byte buffer1OFF[3]={0x00,0x01,0xff};
+  byte buffer2ON[3]={0x00,0xF2,0xff};
+  byte buffer2OFF[3]={0x00,0x02,0xff};
+}
+
+on start
+{
+  InitSerialPort(); // 初始化串口
+  write("继电器驱动已就绪");
+}
+
+// 通道1 闭合/断开定时器触发
+on timer timerACCON
+{
+  Rs232Send(port, buffer1ON, 3);
+}
+on timer timerACCOFF
+{
+  Rs232Send(port, buffer1OFF, 3);
+}

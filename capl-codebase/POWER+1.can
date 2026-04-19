@@ -1,0 +1,37 @@
+/*@!Encoding:936*/
+variables
+{
+  byte port = 1; // 默认串口号
+  byte SetBat_0V[15] = {0xFE, 0x05, 0x00, 0x00, 0x00, 0x00, 0xD9, 0xC5}; // 示例指令
+  byte SetBat_12V[15] = {0xFE, 0x05, 0x00, 0x00, 0xFF, 0x00, 0x98, 0x35};
+}
+
+// 串口电源电压切换逻辑
+on sysvar_update sysvar::Replay::SetVolte
+{
+  if (@this == 0)
+  {
+    Rs232Send(port, SetBat_0V, 8);
+    write("电源切断: 0V");
+  }
+  else if (@this == 12)
+  {
+    Rs232Send(port, SetBat_12V, 8);
+    write("电源开启: 12V");
+  }
+}
+
+// 继电器通道1控制 (ACC/IGN)
+on sysvar_update sysvar::Replay::channel1
+{
+  if(@this == 1)
+  {
+     Rs232Send(port, buffer1ON, 8);
+     write("继电器通道1 闭合");
+  }
+  else
+  {  
+     Rs232Send(port, buffer1OFF, 8);
+     write("继电器通道1 断开");
+  }
+}

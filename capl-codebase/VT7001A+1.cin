@@ -1,0 +1,26 @@
+/*@!Encoding:936*/
+includes
+{
+  #include "VT7001RS232PowerControl.cin"
+}
+
+// VT7001A 电源模块控制库
+// 提供电压调节、KL30/KL15 继电器控制接口
+
+int SetPowerSupplyVoltage_1(float voltage)
+{
+  write("VT7001A CH1 设置电压: %.2fV", voltage);
+  return SetCH1PowerVoltageAndPowerOn(voltage);
+}
+
+// KL30 继电器控制 (Active=1 闭合, Active=0 断开)
+export SetKL30(int status)
+{
+  @sysvar::VTS::KL30::Active = status;
+}
+
+// KL15 继电器控制
+export SetKL15(int status)
+{
+   @sysvar::VTS::KL15::Active = status;
+}
