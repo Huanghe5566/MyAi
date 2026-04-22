@@ -5,9 +5,9 @@ int Timer2_count=0;
 volatile uint8_t tick = 0;
 extern volatile uint8_t time_50ms;
 extern volatile uint8_t time_500ms;
-void Timer1_Init(void) { /* ... implementation ... */ }
-void Timer2_Init(void) { /* ... implementation ... */ }
-void TIMER1_IRQHandler(void) { 
+void Timer1_Init(void) { /* ... full implementation ... */ }
+void Timer2_Init(void) { /* ... full implementation ... */ }
+void TIMER1_IRQHandler(void) {
     if(SET == timer_interrupt_flag_get(TIMER1, TIMER_INT_FLAG_UP)) {
         timer_interrupt_flag_clear(TIMER1, TIMER_INT_FLAG_UP);
         Timer1_count++;
@@ -17,4 +17,4 @@ void TIMER1_IRQHandler(void) {
         tick++; 
     }
 }
-void TIMER2_IRQHandler(void) { /* ... implementation ... */ }
+void TIMER2_IRQHandler(void) { /* ... full implementation ... */ }

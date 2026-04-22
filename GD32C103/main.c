@@ -72,6 +72,8 @@ int main(void)
 			send_flag = CANFD_BUS_Send_Std_Data(CAN1,0x123,test,8);
 			if(send_flag == 1) LED_CAN1_R_On; else LED_CAN1_G_On;
 		}
+		
+		// 原子读取并清零，逐个消费积累的 tick，防止丢失导致定时偏差
 		if(tick)
 		{
 			uint8_t pending;
@@ -81,8 +83,10 @@ int main(void)
 			__enable_irq();
 			while(pending--) custom_timer();
 		}
+		
 		custom_parse_can_msg();
 		Change_LED_State_From_Flag(LED_Flag); 
+		
 		if(time_500ms==1)
 		{
 			time_500ms=0;
