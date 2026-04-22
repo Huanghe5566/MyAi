@@ -29,15 +29,8 @@ void NVIC_Configuration(void)
 	nvic_irq_enable(TIMER2_IRQn,0, 5);
 }
 
-void KEY1_SINGLE_CLICK_Handler(void* btn)
-{
-	KEY1_state = SINGLE_PASS;
-}
-
-void KEY2_SINGLE_CLICK_Handler(void* btn)
-{
-	KEY2_state = SINGLE_PASS;
-}
+void KEY1_SINGLE_CLICK_Handler(void* btn) { KEY1_state = SINGLE_PASS; }
+void KEY2_SINGLE_CLICK_Handler(void* btn) { KEY2_state = SINGLE_PASS; }
 
 int main(void)
 {
@@ -73,7 +66,6 @@ int main(void)
 			if(send_flag == 1) LED_CAN1_R_On; else LED_CAN1_G_On;
 		}
 		
-		// 原子读取并清零，逐个消费积累的 tick，防止丢失导致定时偏差
 		if(tick)
 		{
 			uint8_t pending;
